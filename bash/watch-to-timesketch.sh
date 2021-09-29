@@ -37,6 +37,3 @@ do
     process_files $ZIP &
   fi
 done
-
-
-    docker exec -i timesketch_timesketch-worker_1 /bin/bash -c "log2timeline.py --status_view window --storage_file /usr/share/timesketch/upload/plaso/$SYSTEM.plaso /usr/share/timesketch/upload/$SYSTEM; timesketch_importer -u admin -p "qbd9ATX-mfh1kxb-ycm" --host http://timesketch-web:5000 --timeline_name $SYSTEM --sketch_id 1 /usr/share/timesketch/upload/plaso/$SYSTEM.plaso"
