@@ -5,6 +5,7 @@ apt install inotify-tools -y
 
 # Install pip requirements
 pip3 install boto3 pytz 
+docker-compose exec timesketch-worker bash -c "pip3 install timesketch-import-client"
 
 # Copy files
 cp python/watch-s3-to-timesketch.py /opt/watch-s3-to-timesketch.py
