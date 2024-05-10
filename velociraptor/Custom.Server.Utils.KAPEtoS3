@@ -46,18 +46,18 @@ sources:
           - query: |
                 SELECT * FROM foreach(
                 row={
-                    SELECT * FROM enumerate_flow(client_id=ClientId, flow_id=FlowId)
+                    SELECT *, Data["VFSPath"] AS VFSPath FROM enumerate_flow(client_id=ClientId, flow_id=FlowId)
                 },
                 query={
-                  SELECT FullPath, 
-                         upload(file=FullPath, accessor="fs") AS Upload 
+                  SELECT OSPath, 
+                         upload(file=OSPath, accessor="fs") AS Upload 
                   FROM stat(filename=VFSPath, accessor="fs")
                 })
         '
         
-        // Use second LET if you wish to use client labels in your filename/sketch 
+        // Use second LET if you wish to use client tags in your sketch 
         // LET upload_to_s3(ClientId, FlowId, Fqdn) = SELECT ClientId,
-        LET upload_to_s3(ClientId, FlowId, Fqdn, Label) = SELECT ClientId,
+        LET upload_to_s3(ClientId, FlowId, Fqdn, Tag) = SELECT ClientId,
                upload_s3(bucket=bucket,
                          credentialskey=credentialskey,
                          credentialssecret=credentialssecret,
@@ -66,20 +66,20 @@ sources:
                          //name=format(format="vr_kapefiles_%v.zip", 
                          //   args=[Fqdn])) AS S3
                          name=format(format="vr_kapefiles_%v_%v.zip", 
-                            args=[Fqdn, Label])) AS S3                            
+                            args=[Fqdn, Tag])) AS S3
         FROM collect(artifacts="UploadFlow", artifact_definitions=UploadFlowDefinition,
                      args=dict(`UploadFlow`=dict(
                             ClientId=ClientId, FlowId=FlowId)), 
                      output=output_file)
                      
-        // Use second LET if you wish to use client labels in your filename/sketch 
+        // Use second LET if you wish to use client tags in your sketch 
         // LET completions = SELECT *, client_info(client_id=ClientId).os_info.fqdn AS Fqdn 
-        LET completions = SELECT *, client_info(client_id=ClientId).os_info.fqdn AS Fqdn, client_info(client_id=ClientId).labels[0] as Label 
+        LET completions = SELECT *, client_info(client_id=ClientId).os_info.fqdn AS Fqdn, client_info(client_id=ClientId).labels[0] as Tag 
             FROM watch_monitoring(artifact="System.Flow.Completion")
             WHERE Flow.artifacts_with_results =~ ArtifactNameRegex
         
         // Use second SELECT if you wish to use client labels in your filename/sketch 
         SELECT * FROM foreach(row=completions, query={
           // SELECT * FROM upload_to_s3(ClientId=ClientId, FlowId=FlowId, Fqdn=Fqdn)
-          SELECT * FROM upload_to_s3(ClientId=ClientId, FlowId=FlowId, Fqdn=Fqdn, Label=Label)
+          SELECT * FROM upload_to_s3(ClientId=ClientId, FlowId=FlowId, Fqdn=Fqdn, Tag=Tag)
         })
