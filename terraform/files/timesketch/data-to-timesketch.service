@@ -1,0 +1,9 @@
+[Unit]
+Description=Process data, push to Timesketch
+
+[Service]
+ExecStart=/bin/bash /opt/watch-to-timesketch.sh
+
+[Install]
+WantedBy=multi-user.target
+

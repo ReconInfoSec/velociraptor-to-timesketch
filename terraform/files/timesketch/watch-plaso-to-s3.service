@@ -1,0 +1,8 @@
+[Unit]
+Description=Send Plaso files to S3
+
+[Service]
+ExecStart=/bin/bash /opt/watch-plaso-to-s3.sh
+
+[Install]
+WantedBy=multi-user.target
